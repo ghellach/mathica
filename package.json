@@ -1,7 +1,11 @@
 {
   "name": "mathica",
+  "type": "module",
   "version": "0.0.1",
   "main": "src/app.js",
+  "scripts": {
+    "cli": "node src/launchers/cli.js"
+  },
   "repository": "https://github.com/ghellach/mathica",
   "author": "Achraf Ghellach",
   "license": "MIT"
