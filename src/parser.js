@@ -1,3 +1,19 @@
+function toNumberIfPossible (char) {
+    if(
+        char == "0"
+        || char == "1"
+        || char == "2"
+        || char == "3"
+        || char == "4"
+        || char == "5"
+        || char == "6"
+        || char == "7"
+        || char == "8"
+        || char == "9"
+    ) return Number(char);
+    else return char;
+}
+
 export default function (arg) {
 
     let next = true;
@@ -24,7 +40,8 @@ export default function (arg) {
         s: ["sin", "sec"],
         t: ["tan"],
         l: ["ln", "log"]
-    }
+    };
+    
     function toArray(str) {
         let open = false;
         let openCount = 0;
@@ -32,8 +49,10 @@ export default function (arg) {
 
         let arrLoc = 0;
         let final = [""];
-
-        str.split("").forEach(c => {
+        
+        const chain = str.split("");
+        function charExam(i) {
+            const c = chain[i];
             if(c !== "(" && c !== ")") {
                 if(open) {
                     final[arrLoc] = final[arrLoc] + c;
@@ -63,7 +82,11 @@ export default function (arg) {
 
                 }else final.push(")")
             }
-        })
+
+            if(i !== chain.length - 1) charExam(i+1);
+        };
+
+        charExam(0);
 
         if(openCount !== closeCount) return false;
 
@@ -84,20 +107,64 @@ export default function (arg) {
                 const ev = sortOut(item);
                 if(!ev) return false;
                 else return ev;
-            }else return item;
+            }else {
+                if(item.split("").length !== 1) {
+                    const ev = sortOut(item);
+                    if(!ev) return false;
+                    else return ev;
+                }else return item;
+            };
         })
     }
 
 
-    const parsed = sortOut(String(arg).replace(",", ""));
-    console.log(parsed);
+    let parsed = sortOut(String(arg).replace(",", ""));
     if(!parsed) return {
         error: "paranthesis mismatch"
     }
 
+    function groupNumbers (arr) {
+        let current = 0;
 
+        let final = [];
 
+        function go(i) {
+            const c = toNumberIfPossible(arr[i]);
+            if(i == 0) {
+                final.push(c);
+            }
+            else {
+                if(typeof c === "number") {
+                    if (typeof toNumberIfPossible(final[current]) === "number") {
+                        final[current] = Number(String(final[current])+String(c));
+                    }else {
+                        current = current + 1;
+                        final.push(c);
+                    }
+                }else {
+                    current = current + 1;
+                    final.push(c);
+                }
+            }
 
+            i !== arr.length - 1 ? go(i+1) : null;
+            
+        }
+
+        go(0);
+        
+        return final;
+    }
+
+    function grouperProcess(a) {
+        const ev = groupNumbers(a)
+        return ev.map(arr => {
+            if(typeof arr === "object") return grouperProcess(arr);
+            return arr;
+        });
+    };
+
+    parsed = grouperProcess(parsed);
 
     return {
         raw: arg,
