@@ -1,0 +1,8 @@
+{
+  "name": "mathica",
+  "version": "0.0.1",
+  "main": "src/app.js",
+  "repository": "https://github.com/ghellach/mathica",
+  "author": "Achraf Ghellach",
+  "license": "MIT"
+}
