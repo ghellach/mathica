@@ -26,73 +26,71 @@ export default function (arg) {
         l: ["ln", "log"]
     }
     function toArray(str) {
-        console.log(str);
-        let arrLoc = 0;
-        let final = [[]];
         let open = false;
-
         let openCount = 0;
         let closeCount = 0;
 
-        str.replace(",", "").split("").forEach((c, i) => {
+        let arrLoc = 0;
+        let final = [""];
 
-            if(c != "(" && c != ")") final[arrLoc].push(String(c));
-            else if(c == "(") {
-                openCount = openCount+1;
-
-                if(open) final[arrLoc].push(String(c));
-                else {
+        str.split("").forEach(c => {
+            if(c !== "(" && c !== ")") {
+                if(open) {
+                    final[arrLoc] = final[arrLoc] + c;
+                }else {
+                    arrLoc = arrLoc+1;
+                    final.push(c);
+                }
+            }else if(c == "(") {
+                openCount = openCount + 1;
+                if(open) {
+                    final[arrLoc] = final[arrLoc] + c;
+                }else {
                     open = true;
-                    arrLoc = arrLoc+1;
-                    final.push([]);
+                    arrLoc = arrLoc + 1;
+                    final.push("");
                 }
+            }else if(c == ")") {
+                closeCount = closeCount + 1;
+                if(open) {
+                    if(openCount == closeCount) {
+                        open = false;
+                        arrLoc = arrLoc + 1;
+                    }else {
+                        final[arrLoc] = final[arrLoc] + c;
+                    }
+                    
+
+                }else final.push(")")
             }
-            else if(c == ")") {
-                closeCount = closeCount+1;
-                if(open && closeCount == openCount) {
-                    arrLoc = arrLoc+1;
-                    if(i !== str.split("").length - 1) final.push([]);
-                    open = false;
-                }
-                else final[arrLoc].push(String(c));
-            }
-        });
+        })
 
         if(openCount !== closeCount) return false;
 
         const toBeReturned = [];
-
-       
-
-        final.forEach(a => (a.length !== 0) ? toBeReturned.push(a.filter(c => c !== ",")) : null);
-        
-        console.log(toBeReturned)
+        final.forEach((a, i) => i !== 0 ? toBeReturned.push(a): null);
         return toBeReturned;
-
     }
 
     function sortOut (s) {
-        const arr = toArray(String(s).replace(",", ""));
+        const arr = toArray(s);
         if(!arr) return false;
 
-        return arr.map(a => {
-            const str = String(a).replace(",", "");
+        return arr.map(item => {
             let pr = false;
-            a.forEach(char => {
-                if(char == "(" || char == ")") pr = true;
-            });
+            item.split("").forEach(char => char == "(" || char == ")" ? pr = true : null);
 
             if(pr) {
-                const ev = sortOut(String(str).replace(",", ""));
+                const ev = sortOut(item);
                 if(!ev) return false;
                 else return ev;
-            }   
-            else return a;
-        });
+            }else return item;
+        })
     }
 
 
     const parsed = sortOut(String(arg).replace(",", ""));
+    console.log(parsed);
     if(!parsed) return {
         error: "paranthesis mismatch"
     }
