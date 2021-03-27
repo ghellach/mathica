@@ -1,3 +1,13 @@
+// workers relied on during parsing stage
+
+const functions = {
+    a: ["arcsin", "arccos", "arctan", "arccsc", "arcsec", "arccot"],
+    c: ["cos", "csc", "cot"],
+    s: ["sin", "sec"],
+    t: ["tan"],
+    l: ["ln", "log"]
+};
+
 function toNumberIfPossible (char) {
     if(
         char == "0"
@@ -14,8 +24,17 @@ function toNumberIfPossible (char) {
     else return char;
 }
 
+/**
+    * This functional parser does the following
+    * 1) Checks if expression string only contains allowed characters
+    * 2) Converts the string expression into an array depending on parenthesis. Returns false if array mismatch.
+    * 3) Merges numbers which had been seperated due to string => array conversion
+    * 4) PENDING!!! looks for function expressions like sin, cos, tan, log, ln...
+* */
+
 export default function (arg) {
 
+    // step 1: correct characters check
     let next = true;
     String(arg).split('').forEach(c => {
         let found = false;
@@ -31,17 +50,9 @@ export default function (arg) {
     }
 
 
-    // parse string to computable array
+    //////////////////////////// 
+    // step 2: parses string to computable array
 
-
-    const functions = {
-        a: ["arcsin", "arccos", "arctan", "arccsc", "arcsec", "arccot"],
-        c: ["cos", "csc", "cot"],
-        s: ["sin", "sec"],
-        t: ["tan"],
-        l: ["ln", "log"]
-    };
-    
     function toArray(str) {
         let open = false;
         let openCount = 0;
@@ -123,6 +134,10 @@ export default function (arg) {
         error: "paranthesis mismatch"
     }
 
+
+    /////////////////////////// 
+    // step 3: Merges numbers which had been seperated due to string => array conversion
+
     function groupNumbers (arr) {
         let current = 0;
 
@@ -175,3 +190,4 @@ export default function (arg) {
         computedDate: new Date
     }
 }
+
