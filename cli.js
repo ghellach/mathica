@@ -1,4 +1,4 @@
-import {Mathica} from './app.js';
+import {Mathica} from './src/launchers/app.js';
 
 (function () {
 

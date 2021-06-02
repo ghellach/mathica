@@ -3,9 +3,11 @@
 const functions = {
     a: ["arcsin", "arccos", "arctan", "arccsc", "arcsec", "arccot"],
     c: ["cos", "csc", "cot"],
+    i: ["deriv"],
+    i: ["integ"],
+    l: ["ln", "log"],
     s: ["sin", "sec"],
     t: ["tan"],
-    l: ["ln", "log"]
 };
 
 function toNumberIfPossible (char) {
@@ -63,6 +65,7 @@ export default function (arg) {
         
         const chain = str.split("");
         function charExam(i) {
+            console.log(final);
             const c = chain[i];
             if(c !== "(" && c !== ")") {
                 if(open) {
@@ -81,6 +84,7 @@ export default function (arg) {
                     final.push("");
                 }
             }else if(c == ")") {
+                console.log(open);
                 closeCount = closeCount + 1;
                 if(open) {
                     if(openCount == closeCount) {
@@ -94,7 +98,7 @@ export default function (arg) {
                 }else final.push(")")
             }
 
-            if(i !== chain.length - 1) charExam(i+1);
+            if(i < chain.length - 1) charExam(i+1);
         };
 
         charExam(0);
@@ -107,10 +111,12 @@ export default function (arg) {
     }
 
     function sortOut (s) {
+        console.log(s);
         const arr = toArray(s);
         if(!arr) return false;
 
         return arr.map(item => {
+            if(item == undefined) {return null};
             let pr = false;
             item.split("").forEach(char => char == "(" || char == ")" ? pr = true : null);
 
@@ -167,8 +173,14 @@ export default function (arg) {
         }
 
         go(0);
+
+        let toBeReturned = [];
+        final.forEach(o => {
+            if (o == null||o == undefined) null;
+            else toBeReturned.push(o);
+        })
         
-        return final;
+        return toBeReturned;
     }
 
     function grouperProcess(a) {
@@ -180,6 +192,69 @@ export default function (arg) {
     };
 
     parsed = grouperProcess(parsed);
+
+
+    // step 4: identifies trigo, integral, log and ... functions
+
+    function groupIdentity(arg) {
+
+        const final = [];
+
+        function each (i) {
+            const char = arg[i];
+            if (functions[char]) {
+                const series = functions[char];
+                let found = false;
+                let foundString = ""
+                series.forEach(fn => {
+                    let toBeCompared = "";
+                    for(let j = 0; j < fn.split("").length; j++) toBeCompared = String(toBeCompared) + String(arg[i+j]);
+                    if(toBeCompared == fn) {
+                        found = true;
+                        foundString = fn;
+                        
+                    }
+                });
+                
+                if(found) {
+                    final.push(foundString);
+                    if(i < arg.length) each(i+foundString.split("").length);
+                }else {
+                    final.push(char);
+                    if(i < arg.length) each(i+1);
+                }
+            }
+            else {
+                final.push(char);
+                if(i < arg.length1) each(i+1);
+            }
+        }
+
+        each(0);
+        return final;
+
+    };
+
+    function mathFnProcess(a) {
+        const ev = groupIdentity(a)
+        return ev.map(arr => {
+            if(typeof arr === "object") {
+                const final = mathFnProcess(arr);
+                const toBeReturned = [];
+                final.forEach(f => {
+                    if(f == null || f == undefined) null;
+                    else toBeReturned.push(f);
+                });
+                return toBeReturned;
+            }
+            return arr;
+        });
+    };
+
+    parsed = mathFnProcess(parsed)
+    console.log(parsed);
+
+
 
     return {
         raw: arg,
